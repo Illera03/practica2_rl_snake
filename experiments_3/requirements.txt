@@ -1,0 +1,11 @@
+# Unidad 3 · Métodos avanzados  (Python 3.10–3.12)
+torch                       # CPU basta para todos los laboratorios
+stable-baselines3[extra]>=2.4   # incluye tensorboard, tqdm y rich
+gymnasium[box2d]>=1.0       # LunarLander-v3 (box2d puede necesitar swig: pip install swig)
+gymnasium-robotics>=1.3     # Fetch + MuJoCo (Lab 3.6). Linux, macOS o WSL2
+optuna
+optuna-dashboard
+rl_zoo3                     # hiperparámetros de referencia (Lab 3.7)
+matplotlib
+moviepy                     # solo para grabar vídeos (Lab 3.1 --video)
+# sb3-contrib               # opcional: QR-DQN y TQC

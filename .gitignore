@@ -1,0 +1,11 @@
+# Solo se entregan los logs del Lab 3.3 (config.json + evaluations.npz) y la tabla del diario
+logs/*
+!logs/lab_3_3/
+!logs/tabla_diario.md
+# Modelos: solo el final, añadido a mano con  git add -f logs/lab_3_3/<tag>/seed_0/policy.pt
+*.pt
+*.zip
+optuna/
+__pycache__/
+.ipynb_checkpoints/
+.DS_Store
