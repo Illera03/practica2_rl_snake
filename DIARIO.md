@@ -1,7 +1,7 @@
 # Diario de iteraciones · REINFORCE en el Snake
 
-Nombre:
-Uso de asistentes de IA (para qué y en qué partes):
+Nombres: Jorge Illera, Iker Argulo e Iñigo Lorite
+Uso de asistentes de IA (para qué y en qué partes): Hemos usado Claude como asistente para implementar alguna parte del código y como asistente para redactar las fichas del diario a partir de nuestras decisiones. Las hipótesis, el plan de iteraciones, la elección de qué cambiar en cada una y la interpretación de los resultados las hemos discutido y validado nosotros; hemos revisado y ejecutado todo el código antes de usarlo.
 
 ## Reglas
 
@@ -27,33 +27,39 @@ Generadla con `python experiments_3/diario.py logs/lab_3_3` y pegadla aquí al f
 
 ## Iteración 1 · `it01_original`
 
-**Hipótesis.** ¿Qué creéis que limita al agente ahora mismo y por qué? Apoyaos en lo que habéis visto: causas de fin de partida, `--watch` o `--gif`.
+**Hipótesis.** La política aleatoria come 0,02 manzanas por partida y dura 3,6 pasos; todas sus partidas acaban contra el cuerpo, porque una de cada cuatro acciones da la vuelta sobre el cuello. La observación original da coordenadas absolutas de la cabeza, la distancia a la manzana, la longitud y las últimas 30 acciones, pero no dice qué casillas vecinas son mortales. Para saber si un paso mata, la red tendría que combinar la posición con el tamaño del tablero (paredes) o reconstruir el cuerpo a partir de las acciones pasadas, y eso es muy difícil de aprender con REINFORCE, que tiene mucha varianza.
 
-**Cambio.** Una sola cosa. Comando exacto:
+**Cambio.** Ninguno: punto de partida.
 
 ```
 python experiments_3/lab_3_3_reinforce.py --obs original --reward sparse --seeds 0,1 --steps 100000 --tag it01_original
 ```
 
-**Predicción** (antes de lanzar). ¿Cuántas manzanas esperáis, más o menos? ¿Cambiará cómo acaban las partidas (pared, cuerpo, hambre)? ¿Por qué?
+**Predicción.** Entre 0 y 2 manzanas por partida. Lo primero que se aprende es lo más fácil: no darse la vuelta (la dirección actual está en la última acción), así que las muertes contra el cuerpo deberían pasar a muertes contra la pared. Si aprendiera algo más, subiría el hambre.
 
-**Resultado.** La fila de `diario.py` y lo que se ve al mirar jugar al agente.
+**Resultado.**
 
-**Decisión.** ¿Se queda o se descarta? ¿Qué probáis después y por qué?
+| Iteración | Algoritmo | Obs | Recompensa | Semillas | Pasos | Manzanas | IC 95 % | IQM | Pared | Cuerpo | Hambre | Cambia respecto a la anterior |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| it01_original | REINFORCE | original | sparse | 2 | 100.013 | 0,16 | [0,07, 0,25] | 0,16 | 100 % | 0 % | 0 % | punto de partida |
+
+La semilla 0 se queda en 0,05 manzanas y la 1 sube despacio hasta 0,30. Se cumple lo previsto: el agente aprende a no darse la vuelta (las muertes pasan del 100 % contra el cuerpo al 100 % contra la pared), pero no aprende dónde están las paredes y nunca sobrevive hasta el hambre. GIF: `logs/snake_it01_original.gif`.
+
+**Decisión.** Se descarta la observación original. El cuello de botella es saber qué movimientos matan, así que en la siguiente iteración la observación será solo eso: un bit de peligro por acción.
 
 ---
 
-## Iteración 2 · `it02_…`
+## Iteración 2 · `it02_peligro`
 
-**Hipótesis.**
+**Hipótesis.** El agente de it01 muere siempre contra la pared porque no ve qué casillas vecinas son mortales. Si la observación dice directamente si cada acción lleva a pared o cuerpo, REINFORCE debería aprender a evitarlo enseguida.
 
-**Cambio.**
+**Cambio.** `--obs custom` con `SnakeObservation` = 4 bits de peligro, uno por acción en el orden de `MOVES` (1 si la casilla destino es pared o cuerpo). El cuerpo es `snake[:-1]`, porque la cola se mueve antes de comprobar el choque. No ve la manzana. Rasgo calculado declarado: peligro inmediato por acción (no es una búsqueda, solo describe las casillas vecinas).
 
 ```
-python experiments_3/lab_3_3_reinforce.py … --tag it02_…
+python experiments_3/lab_3_3_reinforce.py --obs custom --reward sparse --seeds 0,1 --steps 100000 --tag it02_peligro
 ```
 
-**Predicción.**
+**Predicción.** Las muertes contra la pared y el cuerpo caerán mucho y la mayoría de partidas acabarán por hambre: con `sparse`, truncar vale 0 y chocar −1, así que sobrevivir compensa aunque no coma. Las manzanas subirán poco (entre 0,3 y 1,5), solo las que encuentre al deambular, porque no sabe dónde está la manzana.
 
 **Resultado.**
 
