@@ -47,19 +47,22 @@ class SnakeObservation(gym.ObservationWrapper):
     def __init__(self, env: gym.Env):
         super().__init__(env)
         self.n_actions = env.action_space.n
-        # it02: solo peligro, un bit por acción (ordenado como MOVES, alineado con las salidas de la red)
-        self.observation_space = spaces.Box(0.0, 1.0, shape=(self.n_actions,), dtype=np.float32)
+        # peligro (4) + comida (4), un valor por acción en el orden de MOVES (alineado con las salidas de la red)
+        self.observation_space = spaces.Box(0.0, 1.0, shape=(2 * self.n_actions,), dtype=np.float32)
 
     def observation(self, obs: np.ndarray) -> np.ndarray:
         u = self.env.unwrapped
         g = u.grid_size
         hx, hy = u.snake[0]
+        ax, ay = u.apple
         body = set(u.snake[:-1])  # la cola se mueve antes de comprobar el choque: su casilla es segura
-        danger = []
+        danger, food = [], []
         for a in range(self.n_actions):
-            x, y = hx + MOVES[a][0], hy + MOVES[a][1]
+            dx, dy = MOVES[a]
+            x, y = hx + dx, hy + dy
             danger.append(not (0 <= x < g and 0 <= y < g) or (x, y) in body)
-        return np.array(danger, dtype=np.float32)
+            food.append(dx * (ax - hx) + dy * (ay - hy) > 0)  # esta acción acerca a la manzana
+        return np.array(danger + food, dtype=np.float32)
 
 
 # =========================================================================== TODO 7
