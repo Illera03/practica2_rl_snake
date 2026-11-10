@@ -63,6 +63,30 @@ python experiments_3/lab_3_3_reinforce.py --obs custom --reward sparse --seeds 0
 
 **Resultado.**
 
+| Iteración | Algoritmo | Obs | Recompensa | Semillas | Pasos | Manzanas | IC 95 % | IQM | Pared | Cuerpo | Hambre | Cambia respecto a la anterior |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| it02_peligro | REINFORCE | custom | sparse | 2 | 100.561 | 0,42 | [0,17, 0,68] | 0,42 | 0 % | 0 % | 100 % | obs |
+
+Se cumple la predicción: las muertes por pared y cuerpo desaparecen (de 100 % pared en it01 a 0 %) y todas las partidas acaban por hambre. Las manzanas suben de 0,16 a 0,42, dentro del rango previsto, y la diferencia entre semillas es grande (0,20 frente a 0,65). Lo aprende muy pronto: a los 25 000 pasos ya está en su meseta y no mejora después. En el GIF la serpiente recorre el borde del tablero dando vueltas, pegada a la pared, y solo come si la manzana aparece en ese recorrido. Es justo lo que premia `sparse` sin información de la manzana: truncar (0) es mejor que chocar (−1). GIF: `logs/snake_it02_peligro.gif`.
+
+**Decisión.** Se queda el peligro: resuelve la supervivencia inmediata. El límite ahora es que el agente no sabe dónde está la manzana, así que el siguiente cambio es añadir hacia dónde está.
+
+---
+
+## Iteración 3 · `it03_comida`
+
+**Hipótesis.** En it02 el agente sobrevive pero no come porque no sabe dónde está la manzana: da vueltas por el borde hasta morir de hambre. Si la observación indica qué acciones le acercan a la manzana, podrá ir a por ella sin dejar de evitar el peligro.
+
+**Cambio.** Se añaden a la observación 4 bits de comida, uno por acción en el orden de `MOVES`: 1 si esa acción reduce la distancia a la manzana (producto escalar entre el desplazamiento y el vector cabeza→manzana mayor que 0). Total 8 entradas. Rasgo calculado declarado: describe dónde está la manzana respecto a la cabeza; no tiene en cuenta obstáculos ni recomienda un camino.
+
+```
+python experiments_3/lab_3_3_reinforce.py --obs custom --reward sparse --seeds 0,1 --steps 100000 --tag it03_comida
+```
+
+**Predicción.** Un salto grande: entre 4 y 12 manzanas por partida. El hambre bajará mucho y la causa principal de muerte pasará a ser el cuerpo: al crecer, la serpiente se encerrará a sí misma porque solo ve las casillas vecinas. Algo de hambre puede quedar si entra en bucles cuando la manzana queda detrás de su cuerpo.
+
+**Resultado.**
+
 **Decisión.**
 
 ---
