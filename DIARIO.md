@@ -45,6 +45,8 @@ python experiments_3/lab_3_3_reinforce.py --obs original --reward sparse --seeds
 
 La semilla 0 se queda en 0,05 manzanas y la 1 sube despacio hasta 0,30. Se cumple lo previsto: el agente aprende a no darse la vuelta (las muertes pasan del 100 % contra el cuerpo al 100 % contra la pared), pero no aprende dónde están las paredes y nunca sobrevive hasta el hambre. GIF: `logs/snake_it01_original.gif`.
 
+*Nota: la hipótesis y la predicción de esta primera iteración se redactaron después de lanzar el entrenamiento, al montar el diario. A partir de it02 todas las fichas se escribieron antes de lanzar.*
+
 **Decisión.** Se descarta la observación original. El cuello de botella es saber qué movimientos matan, así que en la siguiente iteración la observación será solo eso: un bit de peligro por acción.
 
 ---
@@ -108,6 +110,30 @@ python experiments_3/lab_3_3_reinforce.py --obs custom --reward sparse --seeds 0
 ```
 
 **Predicción.** Mejora pequeña: entre 20 y 25 manzanas, posiblemente dentro del ruido con 2 semillas (el intervalo de it03 ya va de 17,9 a 22,4). Las muertes seguirán siendo casi todas contra el cuerpo, porque un rayo recto no ve huecos que se cierran por los lados, pero deberían llegar algo más tarde (serpiente más larga). Puede aparecer algo de hambre si se vuelve más prudente y da rodeos.
+
+**Resultado.**
+
+| Iteración | Algoritmo | Obs | Recompensa | Semillas | Pasos | Manzanas | IC 95 % | IQM | Pared | Cuerpo | Hambre | Cambia respecto a la anterior |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| it04_espacio | REINFORCE | custom | sparse | 2 | 100.002 | 1,48 | [0,57, 2,38] | 1,48 | 36 % | 18 % | 47 % | código de la observación |
+
+La predicción falla de lleno: en lugar de mejorar, las manzanas caen de 20,1 a 1,5, y los intervalos no se solapan. El aprendizaje es mucho más lento: a los 25 000 pasos it03 ya comía 10,4 (semilla 0) y it04 se queda en 0,2 con las dos semillas hasta los 50 000. Al final la semilla 0 llega a 0,95 y la 1 empieza a despegar justo al acabar (6,6 en la última evaluación). Las muertes se reparten entre pared, cuerpo y, sobre todo, hambre (47 %), que en it03 había desaparecido. En los GIF la serpiente no va a por la manzana: da vueltas en círculos pequeños cerca de ella (semilla 1) o va y viene por la parte de abajo del tablero (semilla 0) hasta que se trunca la partida. Es un comportamiento parecido al de it02. Nuestra explicación es que los rayos dan una forma fácil de sobrevivir (ir hacia donde hay más espacio) que la red aprende antes que la comida: con 4 valores continuos más, los 4 bits de comida pasan de ser la mitad de la entrada a un tercio y su señal queda tapada. Que la semilla 1 empiece a subir al final sugiere que el problema es sobre todo de velocidad, pero con 2 semillas y 100 000 pasos no podemos distinguir «más lento» de «peor». GIF: `logs/snake_it04_espacio_s0.gif` y `logs/snake_it04_espacio_s1.gif`.
+
+**Decisión.** Se descarta el espacio libre: con el mismo presupuesto que el resto de iteraciones rinde mucho peor que it03, que sigue siendo el mejor diseño. El problema de encerrarse queda sin resolver y lo anotamos como límite del diseño. La siguiente iteración es la ablación obligatoria sobre it03: quitar el peligro para medir cuánto aporta.
+
+---
+
+## Iteración 5 · `it05_sin_peligro` (ablación)
+
+**Hipótesis.** El mejor diseño hasta ahora es it03 (peligro + comida). Queremos saber cuánto aporta cada parte. La comida ya la medimos de forma indirecta (it02, sin comida, come 0,42), así que quitamos el peligro: sin él, el agente sigue sabiendo hacia dónde está la manzana pero no qué casillas lo matan. Creemos que seguirá yendo a por la manzana, porque es lo que da recompensa, y que lo que más le costará es no chocar con su propio cuerpo: al comer, la manzana nueva puede aparecer detrás y girarse hacia ella le hace chocar con el cuello o el cuerpo. Las paredes deberían importar menos, porque ir a por la manzana casi nunca lleva contra la pared.
+
+**Cambio.** Se quitan de la observación de it03 los 4 bits de peligro: quedan solo los 4 bits de comida, uno por acción en el orden de `MOVES`. Total 4 entradas. El resto (recompensa `sparse`, hiperparámetros, presupuesto) es igual que en it03.
+
+```
+python experiments_3/lab_3_3_reinforce.py --obs custom --reward sparse --seeds 0,1 --steps 100000 --tag it05_sin_peligro
+```
+
+**Predicción.** Menos que it03: entre 5 y 20 manzanas, según la semilla. Aunque siga yendo a por la manzana, sin saber qué movimiento la mata sobrevivirá menos tiempo. Nunca morirá de hambre, porque siempre sabe hacia dónde ir a por la manzana. Casi todas las muertes serán contra el cuerpo (al girarse hacia la siguiente manzana, y más cuanto más larga sea la serpiente) y pocas contra la pared.
 
 **Resultado.**
 
