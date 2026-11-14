@@ -137,6 +137,35 @@ python experiments_3/lab_3_3_reinforce.py --obs custom --reward sparse --seeds 0
 
 **Resultado.**
 
+| Iteración | Algoritmo | Obs | Recompensa | Semillas | Pasos | Manzanas | IC 95 % | IQM | Pared | Cuerpo | Hambre | Cambia respecto a la anterior |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| it05_sin_peligro | REINFORCE | custom | sparse | 2 | 100.001 | 0,20 | [0,20, 0,20] | 0,20 | 100 % | 0 % | 0 % | código de la observación |
+
+La predicción falla: esperábamos entre 5 y 20 manzanas con muertes contra el cuerpo y salen 0,20 con el 100 % de las muertes contra la pared. Las dos semillas se quedan en 0,20 desde los 25 000 pasos y no se mueven. Sí se cumple que no hay hambre. Al mirar las probabilidades que da la red a cada acción se ve qué ha pasado: la política ha dejado de usar «izquierda» en todos los casos (probabilidad 0,00), y además cada semilla descarta otra acción más («arriba» la semilla 0, «abajo» la 1). La serpiente empieza moviéndose hacia la derecha, así que ir a la izquierda al principio es chocar con el cuello. Sin el peligro, el agente no tiene forma de saber cuándo la izquierda es segura y aprende lo único que puede: no ir nunca. Con dos direcciones útiles solo se mueve en diagonal hacia una esquina, come la manzana solo si cae en ese camino y acaba contra la pared. En el GIF la manzana está arriba a la izquierda y la serpiente baja en línea recta hasta la pared. GIF: `logs/snake_it05_sin_peligro_s0.gif` y `logs/snake_it05_sin_peligro_s1.gif`.
+
+Con la ablación, la tabla queda así: solo peligro (it02) da 0,42 manzanas, solo comida (it05) 0,20 y los dos juntos (it03) 20,1. Ninguno de los dos rasgos sirve por separado: se necesitan juntos. La comida dice a dónde ir y el peligro hace que ir hacia allí sea posible.
+
+**Decisión.** El peligro se queda: quitarlo hunde el agente de 20,1 a 0,20 manzanas. El mejor diseño de observación sigue siendo el de it03 (peligro + comida, 8 entradas), y es el que se usa a partir de ahora. La siguiente iteración deja la observación fija y prueba a cambiar la recompensa.
+
+---
+
+## Iteración 6 · `it06_recompensa`
+
+**Hipótesis.** Con `sparse` la única señal es +1 al comer y −1 al chocar, y morir de hambre vale 0, mejor que chocar: es lo que hizo que la serpiente de it02 diera vueltas hasta truncar. Si además se premia acercarse a la manzana y se castiga alejarse, el agente recibe señal en cada paso y no solo al comer, así que debería aprender antes y mejor a ir a por ella.
+
+**Cambio.** Solo la recompensa: `--reward custom` con `SnakeReward` (TODO 7) sobre la observación de it03 (peligro + comida, 8 entradas), que es el mejor diseño según it04 e it05. Respecto a it03 solo cambia la recompensa; respecto a it05 la columna «Cambia» mostrará también el código de la observación, porque se vuelve al de it03. La recompensa nueva:
+- Morir de hambre vale −1, igual que chocar, para cerrar el agujero de dar vueltas hasta truncar.
+- Shaping por potencial F = γΦ(s′) − Φ(s), con Φ(s) = −d / (2(g − 1)) y d la distancia Manhattan de la cabeza a la manzana. Por Ng, Harada y Russell (1999) no cambia la política óptima, y como los términos se cancelan a lo largo de la trayectoria no se puede «farmear» acercándose y alejándose. No se aplica en el paso en que se come (la manzana salta a otra casilla) ni al morir.
+- Se descarta una penalización fija por paso: acumulada, haría que chocar pronto fuera mejor que seguir vivo.
+
+```
+python experiments_3/lab_3_3_reinforce.py --obs custom --reward custom --seeds 0,1 --steps 100000 --tag it06_recompensa
+```
+
+**Predicción.** Mejora clara: más de 20 manzanas, gracias al premio por acercarse y al castigo por alejarse. El castigo por hambre no debería cambiar casi nada, porque it03 ya no moría nunca de hambre. Las muertes serán sobre todo contra la pared y pocas contra el cuerpo. En general, un modelo mejor que it03.
+
+**Resultado.**
+
 **Decisión.**
 
 ---
