@@ -47,18 +47,22 @@ class SnakeObservation(gym.ObservationWrapper):
     def __init__(self, env: gym.Env):
         super().__init__(env)
         self.n_actions = env.action_space.n
-        # ablación de it03: solo comida (4), un valor por acción en el orden de MOVES (sin peligro)
-        self.observation_space = spaces.Box(0.0, 1.0, shape=(self.n_actions,), dtype=np.float32)
+        # peligro (4) + comida (4), un valor por acción en el orden de MOVES (alineado con las salidas de la red)
+        self.observation_space = spaces.Box(0.0, 1.0, shape=(2 * self.n_actions,), dtype=np.float32)
 
     def observation(self, obs: np.ndarray) -> np.ndarray:
         u = self.env.unwrapped
+        g = u.grid_size
         hx, hy = u.snake[0]
         ax, ay = u.apple
-        food = []
+        body = set(u.snake[:-1])  # la cola se mueve antes de comprobar el choque: su casilla es segura
+        danger, food = [], []
         for a in range(self.n_actions):
             dx, dy = MOVES[a]
+            x, y = hx + dx, hy + dy
+            danger.append(not (0 <= x < g and 0 <= y < g) or (x, y) in body)
             food.append(dx * (ax - hx) + dy * (ay - hy) > 0)  # esta acción acerca a la manzana
-        return np.array(food, dtype=np.float32)
+        return np.array(danger + food, dtype=np.float32)
 
 
 # =========================================================================== TODO 7
@@ -72,11 +76,26 @@ class SnakeReward(gym.Wrapper):
     más del diario. Si la cambiáis, comprobad que las manzanas suben, no solo el retorno.
     """
 
+    GAMMA = 0.99   # tiene que ser el mismo --gamma del entrenamiento (shaping por potencial)
+    ALPHA = 1.0
+    STARVE = -1.0  # morir de hambre cuenta como morir
+
+    def _potential(self):
+        u = self.env.unwrapped
+        hx, hy = u.snake[0]
+        d = abs(u.apple[0] - hx) + abs(u.apple[1] - hy)
+        return -self.ALPHA * d / (2 * (u.grid_size - 1))
+
     def step(self, action):
+        phi_old = self._potential()
+        score_old = self.env.unwrapped.score
         obs, reward, terminated, truncated, info = self.env.step(action)
-        # TODO 7: modificad `reward` usando el estado de self.env.unwrapped e `info`.
-        raise NotImplementedError("TODO 7: define tu recompensa")
-        return obs, reward, terminated, truncated, info
+        ate = info["score"] > score_old
+        if truncated and not terminated:
+            reward = self.STARVE
+        elif not terminated and not ate:  # sin shaping al comer (la manzana salta) ni al morir
+            reward += self.GAMMA * self._potential() - phi_old
+        return obs, float(reward), terminated, truncated, info
 
 
 # =========================================================================== (hecho)

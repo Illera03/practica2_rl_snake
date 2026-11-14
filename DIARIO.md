@@ -166,7 +166,15 @@ python experiments_3/lab_3_3_reinforce.py --obs custom --reward custom --seeds 0
 
 **Resultado.**
 
-**Decisión.**
+| Iteración | Algoritmo | Obs | Recompensa | Semillas | Pasos | Manzanas | IC 95 % | IQM | Pared | Cuerpo | Hambre | Cambia respecto a la anterior |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| it06_recompensa | REINFORCE | custom | custom | 2 | 100.209 | 13,21 | [12,92, 13,50] | 13,21 | 0 % | 100 % | 0 % | recompensa, código de la observación |
+
+La columna «Cambia» muestra dos cosas porque compara con it05; respecto a it03 el código de la observación es idéntico y solo cambia la recompensa.
+
+La predicción falla en lo principal: en lugar de pasar de 20, las manzanas bajan de 20,1 a 13,2, y los intervalos no se solapan. Se cumple que el hambre no cambia nada (0 %, como en it03). Sobre las muertes no acertamos: no hay ninguna contra la pared y siguen siendo el 100 % contra el cuerpo, igual que en it03. Lo que sí mejora es el principio del aprendizaje y la diferencia entre semillas: a los 25 000 pasos las dos semillas ya comen 9,6 y 13,1, mientras que en it03 una semilla seguía en 0,35 hasta los 50 000. A cambio, las dos se estancan en torno a 13 desde los 50 000 pasos, por debajo de la meseta de it03 (20–22). En el GIF la serpiente va en línea recta a cada manzana; cuando es larga, entra hasta una manzana rodeada por su propio cuerpo, se la come y se queda encerrada. Es el mismo fallo que en it03, pero llega antes. Nuestra explicación es que el shaping premia cada paso hacia la manzana y castiga cada paso que se aleja, así que el agente aprende a ir por el camino más directo y evita los rodeos, que son justo lo que hace falta para no encerrarse cuando la serpiente es larga. El resultado de Ng, Harada y Russell asegura que no cambia la política óptima, pero no que REINFORCE la encuentre en 100 000 pasos: en la práctica la señal densa lleva antes a la política codiciosa y la deja ahí. GIF: `logs/snake_it06_recompensa_s0.gif` y `logs/snake_it06_recompensa_s1.gif`.
+
+**Decisión.** Se descarta la recompensa propia y el diseño final se queda con `sparse` sobre la observación de it03 (peligro + comida). Con una observación que ya dice hacia dónde está la manzana, la recompensa densa no hace falta: acelera el principio, pero baja el techo. El castigo por hambre no aporta nada porque el agente de it03 ya no se truncaba. Como el agente sigue muriendo siempre contra su cuerpo, eso queda como límite del diseño. Las confirmaciones (baseline y A2C/PPO) se hacen con `--obs custom --reward sparse` y el código de observación de it03.
 
 ---
 
