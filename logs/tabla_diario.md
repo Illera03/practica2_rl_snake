@@ -9,3 +9,5 @@
 | it07_cola | REINFORCE | custom | sparse | 2 | 100.246 | 12,05 | [10,38, 13,72] | 12,05 | 22 % | 78 % | 0 % | recompensa, código de la observación |
 | it08_baseline | REINFORCE + baseline | custom | sparse | 5 | 200.447 | 19,65 | [16,78, 21,46] | 20,68 | 0 % | 100 % | 0 % | baseline, código de la observación, pasos |
 | it08_vanilla | REINFORCE | custom | sparse | 5 | 200.064 | 20,42 | [18,89, 21,95] | 20,27 | 0 % | 100 % | 0 % | baseline |
+| it09_ref_a2c | A2C | custom | sparse | 5 | 200.000 | 21,69 | [20,28, 22,74] | 22,16 | 0 % | 100 % | 0 % | algoritmo |
+| it09_ref_ppo | PPO | custom | sparse | 5 | 200.704 | 23,34 | [21,91, 25,08] | 22,81 | 0 % | 100 % | 0 % | algoritmo |

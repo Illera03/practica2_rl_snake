@@ -1,0 +1,12 @@
+{
+  "algo": "ppo",
+  "env": "snake",
+  "obs": "custom",
+  "reward": "sparse",
+  "grid": 12,
+  "steps": 200000,
+  "seed": 1,
+  "hiperpar\u00e1metros": "valores por defecto de SB3",
+  "obs_code": "0c707736",
+  "reward_code": "f7b127f8"
+}
