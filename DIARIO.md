@@ -223,8 +223,36 @@ python experiments_3/lab_3_3_reinforce.py --obs custom --reward sparse --baselin
 
 **Resultado.**
 
-**Decisión.**
+| Iteración | Algoritmo | Obs | Recompensa | Semillas | Pasos | Manzanas | IC 95 % | IQM | Pared | Cuerpo | Hambre | Cambia respecto a la anterior |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| it08_baseline | REINFORCE + baseline | custom | sparse | 5 | 200.447 | 19,65 | [16,78, 21,46] | 20,68 | 0 % | 100 % | 0 % | baseline, código de la observación, pasos |
+| it08_vanilla | REINFORCE | custom | sparse | 5 | 200.064 | 20,42 | [18,89, 21,95] | 20,27 | 0 % | 100 % | 0 % | baseline |
+
+La columna «Cambia» sale como se esperaba: `it08_baseline` se compara con it07 (se añade el baseline, se vuelve al código de it03 y se pasa a 200 000 pasos) e `it08_vanilla` se compara con `it08_baseline`, así que entre las dos configuraciones solo cambia el baseline. Las semillas 0 y 1 de vanilla repiten exactamente las cifras de it03 durante los primeros 100 000 pasos (por ejemplo, 10,4 y 0,35 manzanas a los 25 000), lo que confirma que el código restaurado es idéntico al de it03 y que los experimentos son reproducibles con la misma semilla.
+
+La predicción se cumple en lo principal. No hay diferencia significativa: los intervalos se solapan casi por completo ([18,89, 21,95] sin baseline frente a [16,78, 21,46] con baseline). Vanilla queda en 20,42 manzanas, dentro del rango previsto de 18 a 24. Con baseline la media es algo menor (19,65), pero por una sola semilla: la semilla 2 se queda en 14,18 manzanas (media de sus 3 últimas evaluaciones), mientras que las otras cuatro están entre 20,53 y 22,03. Por eso la IQM con baseline (20,68) está por encima de su media y es incluso algo mayor que la de vanilla (20,27). Esa semilla llega a 15 manzanas a los 25 000 pasos y después se estanca entre 11,7 y 15,5 durante el resto del entrenamiento; es el tipo de semilla atascada que anticipábamos, compatible con una política que se vuelve determinista demasiado pronto sin bonificación de entropía, aunque no lo hemos comprobado directamente. Sin baseline, las cinco semillas acaban entre 18,22 y 23,08.
+
+También se cumple que el baseline hace más pareja la primera parte del aprendizaje. A los 25 000 pasos, con baseline 3 de las 5 semillas ya comen 15 manzanas o más (17,35, 18,95 y 15), frente a 2 de 5 sin baseline (10,4 y 21,45). A los 50 000 pasos las 5 semillas con baseline pasan de 11 manzanas (desviación típica entre semillas de 3,8), mientras que sin baseline la semilla 3 sigue en 0,35 y no despega hasta los 75 000 (16,1), con una desviación típica entre semillas de 9,3. Al final esa ventaja desaparece: las dos configuraciones convergen a unas 20 manzanas. Las muertes son el 100 % contra el cuerpo en las dos, como en it03. En los GIF de la semilla 0, vanilla come 25 manzanas y baseline 35, y las dos partidas acaban contra el propio cuerpo. Gráfica: `logs/it08_baseline.png`.
+
+**Decisión.** El baseline no mejora el resultado final de forma significativa. Sí reduce la varianza al principio del aprendizaje, pero no evita que alguna semilla se atasque. La normalización de G ya actúa como un baseline constante, y lo que añade v̂(s) se nota en la velocidad, no en el techo. El modelo final de REINFORCE es vanilla: rinde igual, es más simple (sin red de valor) y sus cinco semillas acaban más juntas (de 18,22 a 23,08, frente a 14,18 a 22,03 con baseline). El techo de unas 20 manzanas y el 100 % de muertes contra el cuerpo son iguales con y sin baseline, así que no dependen de la varianza del gradiente. La siguiente iteración compara con PPO y A2C sobre el mismo diseño, para saber si ese techo viene del algoritmo o de la observación.
 
 ---
 
-(Copiad la ficha para cada iteración nueva.)
+## Iteración 9 · `it09_ref_ppo` y `it09_ref_a2c` (referencias)
+
+**Hipótesis.** Con el diseño final, REINFORCE se queda en unas 20 manzanas con y sin baseline (it08: 20,42 sin baseline y 19,65 con baseline, con intervalos solapados), y el 100 % de las partidas acaban contra el propio cuerpo. Queremos separar el límite del algoritmo del límite del diseño. Para eso entrenamos PPO y A2C de Stable-Baselines3, con sus hiperparámetros por defecto, sobre exactamente el mismo diseño (misma observación y misma recompensa) y el mismo presupuesto que it08. Si llegan claramente más alto, el techo de REINFORCE se debe al algoritmo. Si se quedan en lo mismo y también mueren contra el cuerpo, el techo se debe a lo que ve el agente.
+
+**Cambio.** Solo el algoritmo: PPO y A2C de SB3 con 5 semillas y 200 000 pasos, `--obs custom --reward sparse`. Diseño final: peligro + comida (8 entradas), el de it03 (huella `0c707736`). Se evalúan igual que REINFORCE: 20 partidas cada 25 000 pasos con la acción más probable, las mismas semillas de evaluación y la métrica de manzanas por partida. La columna «Cambia» debe mostrar solo «algoritmo» en las dos filas.
+
+```
+python experiments_3/lab_3_3_referencia_sb3.py --algos ppo --obs custom --reward sparse --seeds 0-4 --tag it09_ref
+python experiments_3/lab_3_3_referencia_sb3.py --algos a2c --obs custom --reward sparse --seeds 0-4 --tag it09_ref
+```
+
+**Predicción.** PPO y A2C quedarán por encima de REINFORCE vanilla (20,42, IC [18,89, 21,95]) sin solapar intervalos: PPO entre 22 y 27 manzanas y A2C entre 20 y 25. PPO será el que más rápido sube. REINFORCE usa cada partida una sola vez para un único paso de gradiente, con retornos Monte Carlo de mucha varianza. A2C hace bootstrapping con la red de valor: menos varianza a cambio de algo de sesgo. PPO, además, reutiliza cada lote de experiencia durante varias épocas (10 por defecto en SB3) con clipping, así que saca más aprendizaje de cada partida. Aun así, la diferencia no será enorme: los tres algoritmos ven lo mismo (las casillas vecinas y hacia dónde está la manzana, no la forma del cuerpo), así que los tres seguirán muriendo casi siempre contra su propio cuerpo.
+
+**Resultado.**
+
+**Decisión / conclusión.**
+
+---

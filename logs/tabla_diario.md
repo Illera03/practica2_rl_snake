@@ -7,3 +7,5 @@
 | it05_sin_peligro | REINFORCE | custom | sparse | 2 | 100.001 | 0,20 | [0,20, 0,20] | 0,20 | 100 % | 0 % | 0 % | código de la observación |
 | it06_recompensa | REINFORCE | custom | custom | 2 | 100.209 | 13,21 | [12,92, 13,50] | 13,21 | 0 % | 100 % | 0 % | recompensa, código de la observación |
 | it07_cola | REINFORCE | custom | sparse | 2 | 100.246 | 12,05 | [10,38, 13,72] | 12,05 | 22 % | 78 % | 0 % | recompensa, código de la observación |
+| it08_baseline | REINFORCE + baseline | custom | sparse | 5 | 200.447 | 19,65 | [16,78, 21,46] | 20,68 | 0 % | 100 % | 0 % | baseline, código de la observación, pasos |
+| it08_vanilla | REINFORCE | custom | sparse | 5 | 200.064 | 20,42 | [18,89, 21,95] | 20,27 | 0 % | 100 % | 0 % | baseline |
