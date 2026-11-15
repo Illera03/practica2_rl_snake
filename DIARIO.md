@@ -1,22 +1,21 @@
 # Diario de iteraciones · REINFORCE en el Snake
 
-Nombres: Jorge Illera, Iker Argulo e Iñigo Lorite
-Uso de asistentes de IA (para qué y en qué partes): Hemos usado Claude como asistente para implementar alguna parte del código y como asistente para redactar las fichas del diario a partir de nuestras decisiones. Las hipótesis, el plan de iteraciones, la elección de qué cambiar en cada una y la interpretación de los resultados las hemos discutido y validado nosotros; hemos revisado y ejecutado todo el código antes de usarlo.
+Nombres: Jorge Illera, Iker Argulo e Iñigo Lorite Uso de asistentes de IA (para qué y en qué partes): Hemos usado Claude como asistente para implementar alguna parte del código y como asistente para redactar las fichas del diario a partir de nuestras decisiones. Las hipótesis, el plan de iteraciones, la elección de qué cambiar en cada una y la interpretación de los resultados las hemos discutido y validado nosotros; hemos revisado y ejecutado todo el código antes de usarlo.
 
 ## Reglas
 
-- Cada iteración cambia **una sola cosa** respecto a otra anterior: la observación, la recompensa, un hiperparámetro, el baseline…
-- La ficha se rellena **antes de lanzar** hasta la predicción incluida. El resultado y la decisión se escriben después. Haced un commit al terminar cada iteración.
-- Lanzad cada iteración con `--tag itNN_nombre`, para que tenga su propia carpeta en `logs/lab_3_3`.
-- **Explorar barato**: 2 semillas y 100 000 pasos. **Confirmar caro**: solo las 2–3 configuraciones finales, con 5 semillas y 200 000 pasos.
+- Cada iteración cambia **una sola cosa** respecto a otra anterior: la observación, la recompensa, un hiperparámetro, el baseline…  
+- La ficha se rellena **antes de lanzar** hasta la predicción incluida. El resultado y la decisión se escriben después. Haced un commit al terminar cada iteración.  
+- Lanzad cada iteración con `--tag itNN_nombre`, para que tenga su propia carpeta en `logs/lab_3_3`.  
+- **Explorar barato**: 2 semillas y 100 000 pasos. **Confirmar caro**: solo las 2–3 configuraciones finales, con 5 semillas y 200 000 pasos.  
 - Una iteración que no mejora, bien analizada, vale lo mismo que una que mejora.
 
 Iteraciones obligatorias (en el orden que queráis, salvo la primera):
 
-1. REINFORCE con la observación original (punto de partida).
-2. Al menos una observación propia.
-3. Una ablación: quitar un rasgo de vuestra observación y medir cuánto aporta.
-4. Con y sin baseline (confirmado con 5 semillas).
+1. REINFORCE con la observación original (punto de partida).  
+2. Al menos una observación propia.  
+3. Una ablación: quitar un rasgo de vuestra observación y medir cuánto aporta.  
+4. Con y sin baseline (confirmado con 5 semillas).  
 5. Comparación con A2C y PPO con vuestro diseño final (5 semillas).
 
 ## Tabla resumen
@@ -40,8 +39,8 @@ python experiments_3/lab_3_3_reinforce.py --obs original --reward sparse --seeds
 **Resultado.**
 
 | Iteración | Algoritmo | Obs | Recompensa | Semillas | Pasos | Manzanas | IC 95 % | IQM | Pared | Cuerpo | Hambre | Cambia respecto a la anterior |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| it01_original | REINFORCE | original | sparse | 2 | 100.013 | 0,16 | [0,07, 0,25] | 0,16 | 100 % | 0 % | 0 % | punto de partida |
+| :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- |
+| it01\_original | REINFORCE | original | sparse | 2 | 100.013 | 0,16 | \[0,07, 0,25\] | 0,16 | 100 % | 0 % | 0 % | punto de partida |
 
 La semilla 0 se queda en 0,05 manzanas y la 1 sube despacio hasta 0,30. Se cumple lo previsto: el agente aprende a no darse la vuelta (las muertes pasan del 100 % contra el cuerpo al 100 % contra la pared), pero no aprende dónde están las paredes y nunca sobrevive hasta el hambre. GIF: `logs/snake_it01_original.gif`.
 
@@ -55,7 +54,7 @@ La semilla 0 se queda en 0,05 manzanas y la 1 sube despacio hasta 0,30. Se cumpl
 
 **Hipótesis.** El agente de it01 muere siempre contra la pared porque no ve qué casillas vecinas son mortales. Si la observación dice directamente si cada acción lleva a pared o cuerpo, REINFORCE debería aprender a evitarlo enseguida.
 
-**Cambio.** `--obs custom` con `SnakeObservation` = 4 bits de peligro, uno por acción en el orden de `MOVES` (1 si la casilla destino es pared o cuerpo). El cuerpo es `snake[:-1]`, porque la cola se mueve antes de comprobar el choque. No ve la manzana. Rasgo calculado declarado: peligro inmediato por acción (no es una búsqueda, solo describe las casillas vecinas).
+**Cambio.** `--obs custom` con `SnakeObservation` \= 4 bits de peligro, uno por acción en el orden de `MOVES` (1 si la casilla destino es pared o cuerpo). El cuerpo es `snake[:-1]`, porque la cola se mueve antes de comprobar el choque. No ve la manzana. Rasgo calculado declarado: peligro inmediato por acción (no es una búsqueda, solo describe las casillas vecinas).
 
 ```
 python experiments_3/lab_3_3_reinforce.py --obs custom --reward sparse --seeds 0,1 --steps 100000 --tag it02_peligro
@@ -66,8 +65,8 @@ python experiments_3/lab_3_3_reinforce.py --obs custom --reward sparse --seeds 0
 **Resultado.**
 
 | Iteración | Algoritmo | Obs | Recompensa | Semillas | Pasos | Manzanas | IC 95 % | IQM | Pared | Cuerpo | Hambre | Cambia respecto a la anterior |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| it02_peligro | REINFORCE | custom | sparse | 2 | 100.561 | 0,42 | [0,17, 0,68] | 0,42 | 0 % | 0 % | 100 % | obs |
+| :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- |
+| it02\_peligro | REINFORCE | custom | sparse | 2 | 100.561 | 0,42 | \[0,17, 0,68\] | 0,42 | 0 % | 0 % | 100 % | obs |
 
 Se cumple la predicción: las muertes por pared y cuerpo desaparecen (de 100 % pared en it01 a 0 %) y todas las partidas acaban por hambre. Las manzanas suben de 0,16 a 0,42, dentro del rango previsto, y la diferencia entre semillas es grande (0,20 frente a 0,65). Lo aprende muy pronto: a los 25 000 pasos ya está en su meseta y no mejora después. En el GIF la serpiente recorre el borde del tablero dando vueltas, pegada a la pared, y solo come si la manzana aparece en ese recorrido. Es justo lo que premia `sparse` sin información de la manzana: truncar (0) es mejor que chocar (−1). GIF: `logs/snake_it02_peligro.gif`.
 
@@ -90,8 +89,8 @@ python experiments_3/lab_3_3_reinforce.py --obs custom --reward sparse --seeds 0
 **Resultado.**
 
 | Iteración | Algoritmo | Obs | Recompensa | Semillas | Pasos | Manzanas | IC 95 % | IQM | Pared | Cuerpo | Hambre | Cambia respecto a la anterior |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| it03_comida | REINFORCE | custom | sparse | 2 | 100.026 | 20,12 | [17,85, 22,40] | 20,12 | 0 % | 100 % | 0 % | código de la observación |
+| :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- |
+| it03\_comida | REINFORCE | custom | sparse | 2 | 100.026 | 20,12 | \[17,85, 22,40\] | 20,12 | 0 % | 100 % | 0 % | código de la observación |
 
 El salto es mucho mayor de lo previsto: de 0,42 a 20,1 manzanas por partida, por encima del rango de 4 a 12 que esperábamos. La parte cualitativa sí se cumple: el hambre desaparece (de 100 % a 0 %) y todas las partidas acaban contra el propio cuerpo. Infravaloramos lo suficientes que son peligro y comida juntos: con esos 8 bits basta una regla casi codiciosa ("ve hacia la manzana por una casilla segura"), que una red pequeña aprende enseguida. Las dos semillas aprenden a ritmos muy distintos: la 0 ya come 10,4 a los 25 000 pasos y la 1 sigue en 0,35 hasta que salta a 23,75 a los 50 000; es la varianza típica de REINFORCE. En el GIF la serpiente va directa a cada manzana y, cuando ya es larga (unas 20 casillas), se mete en un hueco cerrado por su propio cuerpo y no puede salir: solo ve las casillas vecinas, así que no sabe que el camino no tiene salida hasta que ya no queda ninguna. GIF: `logs/snake_it03_comida.gif`.
 
@@ -103,7 +102,7 @@ El salto es mucho mayor de lo previsto: de 0,42 a 20,1 manzanas por partida, por
 
 **Hipótesis.** En it03 todas las partidas acaban contra el cuerpo porque la serpiente se mete en huecos sin salida: el peligro solo mira una casilla. Si sabe cuánto espacio libre hay en cada dirección, podrá evitar los pasillos cortos y encerrarse menos.
 
-**Cambio.** Se añaden 4 valores de espacio libre, uno por acción en el orden de `MOVES`: casillas libres en línea recta desde la cabeza hasta la primera pared o cuerpo, divididas por `grid_size − 1` para que queden en [0, 1]. Total 12 entradas. Rasgo calculado declarado: es un rayo en línea recta que describe el estado, no una búsqueda de caminos (no mira si el hueco tiene salida).
+**Cambio.** Se añaden 4 valores de espacio libre, uno por acción en el orden de `MOVES`: casillas libres en línea recta desde la cabeza hasta la primera pared o cuerpo, divididas por `grid_size − 1` para que queden en \[0, 1\]. Total 12 entradas. Rasgo calculado declarado: es un rayo en línea recta que describe el estado, no una búsqueda de caminos (no mira si el hueco tiene salida).
 
 ```
 python experiments_3/lab_3_3_reinforce.py --obs custom --reward sparse --seeds 0,1 --steps 100000 --tag it04_espacio
@@ -114,10 +113,10 @@ python experiments_3/lab_3_3_reinforce.py --obs custom --reward sparse --seeds 0
 **Resultado.**
 
 | Iteración | Algoritmo | Obs | Recompensa | Semillas | Pasos | Manzanas | IC 95 % | IQM | Pared | Cuerpo | Hambre | Cambia respecto a la anterior |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| it04_espacio | REINFORCE | custom | sparse | 2 | 100.002 | 1,48 | [0,57, 2,38] | 1,48 | 36 % | 18 % | 47 % | código de la observación |
+| :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- |
+| it04\_espacio | REINFORCE | custom | sparse | 2 | 100.002 | 1,48 | \[0,57, 2,38\] | 1,48 | 36 % | 18 % | 47 % | código de la observación |
 
-La predicción falla de lleno: en lugar de mejorar, las manzanas caen de 20,1 a 1,5, y los intervalos no se solapan. El aprendizaje es mucho más lento: a los 25 000 pasos it03 ya comía 10,4 (semilla 0) y it04 se queda en 0,2 con las dos semillas hasta los 50 000. Al final la semilla 0 llega a 0,95 y la 1 empieza a despegar justo al acabar (6,6 en la última evaluación). Las muertes se reparten entre pared, cuerpo y, sobre todo, hambre (47 %), que en it03 había desaparecido. En los GIF la serpiente no va a por la manzana: da vueltas en círculos pequeños cerca de ella (semilla 1) o va y viene por la parte de abajo del tablero (semilla 0) hasta que se trunca la partida. Es un comportamiento parecido al de it02. Nuestra explicación es que los rayos dan una forma fácil de sobrevivir (ir hacia donde hay más espacio) que la red aprende antes que la comida: con 4 valores continuos más, los 4 bits de comida pasan de ser la mitad de la entrada a un tercio y su señal queda tapada. Que la semilla 1 empiece a subir al final sugiere que el problema es sobre todo de velocidad, pero con 2 semillas y 100 000 pasos no podemos distinguir «más lento» de «peor». GIF: `logs/snake_it04_espacio_s0.gif` y `logs/snake_it04_espacio_s1.gif`.
+La predicción falla de lleno: en lugar de mejorar, las manzanas caen de 20,1 a 1,5, y los intervalos no se solapan. El aprendizaje es mucho más lento: a los 25 000 pasos it03 ya comía 10,4 (semilla 0\) y it04 se queda en 0,2 con las dos semillas hasta los 50 000\. Al final la semilla 0 llega a 0,95 y la 1 empieza a despegar justo al acabar (6,6 en la última evaluación). Las muertes se reparten entre pared, cuerpo y, sobre todo, hambre (47 %), que en it03 había desaparecido. En los GIF la serpiente no va a por la manzana: da vueltas en círculos pequeños cerca de ella (semilla 1\) o va y viene por la parte de abajo del tablero (semilla 0\) hasta que se trunca la partida. Es un comportamiento parecido al de it02. Nuestra explicación es que los rayos dan una forma fácil de sobrevivir (ir hacia donde hay más espacio) que la red aprende antes que la comida: con 4 valores continuos más, los 4 bits de comida pasan de ser la mitad de la entrada a un tercio y su señal queda tapada. Que la semilla 1 empiece a subir al final sugiere que el problema es sobre todo de velocidad, pero con 2 semillas y 100 000 pasos no podemos distinguir «más lento» de «peor». GIF: `logs/snake_it04_espacio_s0.gif` y `logs/snake_it04_espacio_s1.gif`.
 
 **Decisión.** Se descarta el espacio libre: con el mismo presupuesto que el resto de iteraciones rinde mucho peor que it03, que sigue siendo el mejor diseño. El problema de encerrarse queda sin resolver y lo anotamos como límite del diseño. La siguiente iteración es la ablación obligatoria sobre it03: quitar el peligro para medir cuánto aporta.
 
@@ -125,7 +124,7 @@ La predicción falla de lleno: en lugar de mejorar, las manzanas caen de 20,1 a 
 
 ## Iteración 5 · `it05_sin_peligro` (ablación)
 
-**Hipótesis.** El mejor diseño hasta ahora es it03 (peligro + comida). Queremos saber cuánto aporta cada parte. La comida ya la medimos de forma indirecta (it02, sin comida, come 0,42), así que quitamos el peligro: sin él, el agente sigue sabiendo hacia dónde está la manzana pero no qué casillas lo matan. Creemos que seguirá yendo a por la manzana, porque es lo que da recompensa, y que lo que más le costará es no chocar con su propio cuerpo: al comer, la manzana nueva puede aparecer detrás y girarse hacia ella le hace chocar con el cuello o el cuerpo. Las paredes deberían importar menos, porque ir a por la manzana casi nunca lleva contra la pared.
+**Hipótesis.** El mejor diseño hasta ahora es it03 (peligro \+ comida). Queremos saber cuánto aporta cada parte. La comida ya la medimos de forma indirecta (it02, sin comida, come 0,42), así que quitamos el peligro: sin él, el agente sigue sabiendo hacia dónde está la manzana pero no qué casillas lo matan. Creemos que seguirá yendo a por la manzana, porque es lo que da recompensa, y que lo que más le costará es no chocar con su propio cuerpo: al comer, la manzana nueva puede aparecer detrás y girarse hacia ella le hace chocar con el cuello o el cuerpo. Las paredes deberían importar menos, porque ir a por la manzana casi nunca lleva contra la pared.
 
 **Cambio.** Se quitan de la observación de it03 los 4 bits de peligro: quedan solo los 4 bits de comida, uno por acción en el orden de `MOVES`. Total 4 entradas. El resto (recompensa `sparse`, hiperparámetros, presupuesto) es igual que en it03.
 
@@ -138,24 +137,25 @@ python experiments_3/lab_3_3_reinforce.py --obs custom --reward sparse --seeds 0
 **Resultado.**
 
 | Iteración | Algoritmo | Obs | Recompensa | Semillas | Pasos | Manzanas | IC 95 % | IQM | Pared | Cuerpo | Hambre | Cambia respecto a la anterior |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| it05_sin_peligro | REINFORCE | custom | sparse | 2 | 100.001 | 0,20 | [0,20, 0,20] | 0,20 | 100 % | 0 % | 0 % | código de la observación |
+| :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- |
+| it05\_sin\_peligro | REINFORCE | custom | sparse | 2 | 100.001 | 0,20 | \[0,20, 0,20\] | 0,20 | 100 % | 0 % | 0 % | código de la observación |
 
 La predicción falla: esperábamos entre 5 y 20 manzanas con muertes contra el cuerpo y salen 0,20 con el 100 % de las muertes contra la pared. Las dos semillas se quedan en 0,20 desde los 25 000 pasos y no se mueven. Sí se cumple que no hay hambre. Al mirar las probabilidades que da la red a cada acción se ve qué ha pasado: la política ha dejado de usar «izquierda» en todos los casos (probabilidad 0,00), y además cada semilla descarta otra acción más («arriba» la semilla 0, «abajo» la 1). La serpiente empieza moviéndose hacia la derecha, así que ir a la izquierda al principio es chocar con el cuello. Sin el peligro, el agente no tiene forma de saber cuándo la izquierda es segura y aprende lo único que puede: no ir nunca. Con dos direcciones útiles solo se mueve en diagonal hacia una esquina, come la manzana solo si cae en ese camino y acaba contra la pared. En el GIF la manzana está arriba a la izquierda y la serpiente baja en línea recta hasta la pared. GIF: `logs/snake_it05_sin_peligro_s0.gif` y `logs/snake_it05_sin_peligro_s1.gif`.
 
 Con la ablación, la tabla queda así: solo peligro (it02) da 0,42 manzanas, solo comida (it05) 0,20 y los dos juntos (it03) 20,1. Ninguno de los dos rasgos sirve por separado: se necesitan juntos. La comida dice a dónde ir y el peligro hace que ir hacia allí sea posible.
 
-**Decisión.** El peligro se queda: quitarlo hunde el agente de 20,1 a 0,20 manzanas. El mejor diseño de observación sigue siendo el de it03 (peligro + comida, 8 entradas), y es el que se usa a partir de ahora. La siguiente iteración deja la observación fija y prueba a cambiar la recompensa.
+**Decisión.** El peligro se queda: quitarlo hunde el agente de 20,1 a 0,20 manzanas. El mejor diseño de observación sigue siendo el de it03 (peligro \+ comida, 8 entradas), y es el que se usa a partir de ahora. La siguiente iteración deja la observación fija y prueba a cambiar la recompensa.
 
 ---
 
 ## Iteración 6 · `it06_recompensa`
 
-**Hipótesis.** Con `sparse` la única señal es +1 al comer y −1 al chocar, y morir de hambre vale 0, mejor que chocar: es lo que hizo que la serpiente de it02 diera vueltas hasta truncar. Si además se premia acercarse a la manzana y se castiga alejarse, el agente recibe señal en cada paso y no solo al comer, así que debería aprender antes y mejor a ir a por ella.
+**Hipótesis.** Con `sparse` la única señal es \+1 al comer y −1 al chocar, y morir de hambre vale 0, mejor que chocar: es lo que hizo que la serpiente de it02 diera vueltas hasta truncar. Si además se premia acercarse a la manzana y se castiga alejarse, el agente recibe señal en cada paso y no solo al comer, así que debería aprender antes y mejor a ir a por ella.
 
-**Cambio.** Solo la recompensa: `--reward custom` con `SnakeReward` (TODO 7) sobre la observación de it03 (peligro + comida, 8 entradas), que es el mejor diseño según it04 e it05. Respecto a it03 solo cambia la recompensa; respecto a it05 la columna «Cambia» mostrará también el código de la observación, porque se vuelve al de it03. La recompensa nueva:
-- Morir de hambre vale −1, igual que chocar, para cerrar el agujero de dar vueltas hasta truncar.
-- Shaping por potencial F = γΦ(s′) − Φ(s), con Φ(s) = −d / (2(g − 1)) y d la distancia Manhattan de la cabeza a la manzana. Por Ng, Harada y Russell (1999) no cambia la política óptima, y como los términos se cancelan a lo largo de la trayectoria no se puede «farmear» acercándose y alejándose. No se aplica en el paso en que se come (la manzana salta a otra casilla) ni al morir.
+**Cambio.** Solo la recompensa: `--reward custom` con `SnakeReward` (TODO 7\) sobre la observación de it03 (peligro \+ comida, 8 entradas), que es el mejor diseño según it04 e it05. Respecto a it03 solo cambia la recompensa; respecto a it05 la columna «Cambia» mostrará también el código de la observación, porque se vuelve al de it03. La recompensa nueva:
+
+- Morir de hambre vale −1, igual que chocar, para cerrar el agujero de dar vueltas hasta truncar.  
+- Shaping por potencial F \= γΦ(s′) − Φ(s), con Φ(s) \= −d / (2(g − 1)) y d la distancia Manhattan de la cabeza a la manzana. Por Ng, Harada y Russell (1999) no cambia la política óptima, y como los términos se cancelan a lo largo de la trayectoria no se puede «farmear» acercándose y alejándose. No se aplica en el paso en que se come (la manzana salta a otra casilla) ni al morir.  
 - Se descarta una penalización fija por paso: acumulada, haría que chocar pronto fuera mejor que seguir vivo.
 
 ```
@@ -167,14 +167,14 @@ python experiments_3/lab_3_3_reinforce.py --obs custom --reward custom --seeds 0
 **Resultado.**
 
 | Iteración | Algoritmo | Obs | Recompensa | Semillas | Pasos | Manzanas | IC 95 % | IQM | Pared | Cuerpo | Hambre | Cambia respecto a la anterior |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| it06_recompensa | REINFORCE | custom | custom | 2 | 100.209 | 13,21 | [12,92, 13,50] | 13,21 | 0 % | 100 % | 0 % | recompensa, código de la observación |
+| :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- |
+| it06\_recompensa | REINFORCE | custom | custom | 2 | 100.209 | 13,21 | \[12,92, 13,50\] | 13,21 | 0 % | 100 % | 0 % | recompensa, código de la observación |
 
 La columna «Cambia» muestra dos cosas porque compara con it05; respecto a it03 el código de la observación es idéntico y solo cambia la recompensa.
 
-La predicción falla en lo principal: en lugar de pasar de 20, las manzanas bajan de 20,1 a 13,2, y los intervalos no se solapan. Se cumple que el hambre no cambia nada (0 %, como en it03). Sobre las muertes no acertamos: no hay ninguna contra la pared y siguen siendo el 100 % contra el cuerpo, igual que en it03. Lo que sí mejora es el principio del aprendizaje y la diferencia entre semillas: a los 25 000 pasos las dos semillas ya comen 9,6 y 13,1, mientras que en it03 una semilla seguía en 0,35 hasta los 50 000. A cambio, las dos se estancan en torno a 13 desde los 50 000 pasos, por debajo de la meseta de it03 (20–22). En el GIF la serpiente va en línea recta a cada manzana; cuando es larga, entra hasta una manzana rodeada por su propio cuerpo, se la come y se queda encerrada. Es el mismo fallo que en it03, pero llega antes. Nuestra explicación es que el shaping premia cada paso hacia la manzana y castiga cada paso que se aleja, así que el agente aprende a ir por el camino más directo y evita los rodeos, que son justo lo que hace falta para no encerrarse cuando la serpiente es larga. El resultado de Ng, Harada y Russell asegura que no cambia la política óptima, pero no que REINFORCE la encuentre en 100 000 pasos: en la práctica la señal densa lleva antes a la política codiciosa y la deja ahí. GIF: `logs/snake_it06_recompensa_s0.gif` y `logs/snake_it06_recompensa_s1.gif`.
+La predicción falla en lo principal: en lugar de pasar de 20, las manzanas bajan de 20,1 a 13,2, y los intervalos no se solapan. Se cumple que el hambre no cambia nada (0 %, como en it03). Sobre las muertes no acertamos: no hay ninguna contra la pared y siguen siendo el 100 % contra el cuerpo, igual que en it03. Lo que sí mejora es el principio del aprendizaje y la diferencia entre semillas: a los 25 000 pasos las dos semillas ya comen 9,6 y 13,1, mientras que en it03 una semilla seguía en 0,35 hasta los 50 000\. A cambio, las dos se estancan en torno a 13 desde los 50 000 pasos, por debajo de la meseta de it03 (20–22). En el GIF la serpiente va en línea recta a cada manzana; cuando es larga, entra hasta una manzana rodeada por su propio cuerpo, se la come y se queda encerrada. Es el mismo fallo que en it03, pero llega antes. Nuestra explicación es que el shaping premia cada paso hacia la manzana y castiga cada paso que se aleja, así que el agente aprende a ir por el camino más directo y evita los rodeos, que son justo lo que hace falta para no encerrarse cuando la serpiente es larga. El resultado de Ng, Harada y Russell asegura que no cambia la política óptima, pero no que REINFORCE la encuentre en 100 000 pasos: en la práctica la señal densa lleva antes a la política codiciosa y la deja ahí. GIF: `logs/snake_it06_recompensa_s0.gif` y `logs/snake_it06_recompensa_s1.gif`.
 
-**Decisión.** Se descarta la recompensa propia y el diseño final se queda con `sparse` sobre la observación de it03 (peligro + comida). Con una observación que ya dice hacia dónde está la manzana, la recompensa densa no hace falta: acelera el principio, pero baja el techo. El castigo por hambre no aporta nada porque el agente de it03 ya no se truncaba. Como el agente sigue muriendo siempre contra su cuerpo, eso queda como límite del diseño. Las confirmaciones (baseline y A2C/PPO) se hacen con `--obs custom --reward sparse` y el código de observación de it03.
+**Decisión.** Se descarta la recompensa propia y el diseño final se queda con `sparse` sobre la observación de it03 (peligro \+ comida). Con una observación que ya dice hacia dónde está la manzana, la recompensa densa no hace falta: acelera el principio, pero baja el techo. El castigo por hambre no aporta nada porque el agente de it03 ya no se truncaba. Como el agente sigue muriendo siempre contra su cuerpo, eso queda como límite del diseño. Las confirmaciones (baseline y A2C/PPO) se hacen con `--obs custom --reward sparse` y el código de observación de it03.
 
 ---
 
@@ -191,6 +191,35 @@ python experiments_3/lab_3_3_reinforce.py --obs custom --reward sparse --seeds 0
 **Predicción.** Entre 18 y 26 manzanas por partida, probablemente dentro del ruido de it03 con 2 semillas (su intervalo es [17,85, 22,40]). Las muertes seguirán siendo casi todas contra el cuerpo, porque saber hacia dónde está la cola no dice si el hueco en el que se mete tiene salida, pero deberían llegar algo más tarde. Hay dos riesgos. Como en it04, 4 entradas más pueden ralentizar el principio del aprendizaje, aunque menos que los rayos, porque son bits con el mismo formato que la comida. Y si seguir a la cola resulta más fácil que buscar la manzana, la serpiente podría perseguirse a sí misma en círculo, y aparecerían muertes por hambre.
 
 **Criterio de decisión (fijado antes de lanzar).** La cola se queda solo si las manzanas superan a it03 (20,12) sin que aparezcan muertes por hambre. Si el resultado queda dentro del ruido o empeora, volvemos al diseño de it03 por simplicidad (8 entradas en lugar de 12).
+
+**Resultado.**
+
+| Iteración | Algoritmo | Obs | Recompensa | Semillas | Pasos | Manzanas | IC 95 % | IQM | Pared | Cuerpo | Hambre | Cambia respecto a la anterior |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| it07_cola | REINFORCE | custom | sparse | 2 | 100.246 | 12,05 | [10,38, 13,72] | 12,05 | 22 % | 78 % | 0 % | recompensa, código de la observación |
+
+La columna «Cambia» muestra dos cosas porque compara con it06 (`--reward custom`); respecto a it03 solo cambia el código de la observación.
+
+La predicción falla en lo principal: esperábamos entre 18 y 26 manzanas y salen 12,05, por debajo de it03 (20,12), sin que los intervalos se solapen ([10,38, 13,72] frente a [17,85, 22,40]). De los dos riesgos que anotamos, el de seguir a la cola en círculo no aparece (0 % de hambre), pero el de un aprendizaje más lento se cumple de lleno. A los 25 000 pasos las dos semillas siguen en 0,2 y 0,1 manzanas, igual que it04 en ese punto (0,2), mientras que la semilla 0 de it03 ya comía 10,4. Después sí despegan: 10,55 y 7,5 a los 50 000 pasos, 14,85 y 9,4 a los 75 000 y 15,75 y 14,25 a los 100 000. Las dos semillas siguen subiendo al final, mientras que it03 ya estaba en su meseta (20,3 y 21,75). Las muertes siguen siendo sobre todo contra el cuerpo (78 %), pero aparece un 22 % contra la pared, que en it03 no había. También en it04 las muertes contra la pared aparecían mientras el agente aún estaba aprendiendo, así que lo interpretamos como una política que todavía no se ha asentado. En los GIF la semilla 0 come 12 manzanas y la 1 come 17, y las dos partidas acaban contra el propio cuerpo.
+
+Nuestra explicación es la misma que en it04, pero más suave: cada entrada que se añade a los 8 bits de it03 retrasa el momento en que la red aprende a combinar peligro y comida, que es lo que de verdad da manzanas. Con bits binarios el retraso es mucho menor que con rayos continuos (12,05 frente a 1,48 manzanas con el mismo presupuesto), pero en 100 000 pasos no se recupera. Como las curvas siguen subiendo, con más pasos podría acercarse a it03, pero con 2 semillas y 100 000 pasos no hay ningún indicio de que la cola ayude a encerrarse menos: la mayoría de muertes siguen siendo contra el cuerpo. GIF: `logs/snake_it07_cola_s0.gif` y `logs/snake_it07_cola_s1.gif`. Gráfica: `logs/it07_cola.png`.
+
+**Decisión.** Se descarta la cola, aplicando el criterio fijado antes de lanzar: no supera a it03 y, además, aprende más despacio. El diseño final vuelve a ser el de it03 (peligro + comida, 8 entradas) con `sparse`, y antes de las confirmaciones se restaura su código exacto (huella `0c707736`). Encerrarse queda como límite del diseño: ni los rayos de espacio libre (it04) ni la dirección de la cola (it07) lo resuelven con REINFORCE en este presupuesto, porque las dos ralentizan el aprendizaje más de lo que aportan. La siguiente iteración es la confirmación obligatoria con y sin baseline, con 5 semillas y 200 000 pasos.
+
+---
+
+## Iteración 8 · `it08_vanilla` frente a `it08_baseline` (confirmación)
+
+**Hipótesis.** En la exploración, REINFORCE vanilla tiene mucha varianza entre semillas: en it03 la semilla 0 ya comía 10,4 manzanas a los 25 000 pasos, mientras que la semilla 1 seguía en 0,35 y no despegó hasta los 50 000 (23,75). El baseline v̂(s) resta a cada retorno lo que se esperaba obtener desde ese estado, así que el gradiente debería tener menos varianza y las semillas deberían aprender de forma más pareja. Esta es la confirmación obligatoria con y sin baseline, con 5 semillas y 200 000 pasos.
+
+**Cambio.** Solo `--baseline`. Las dos configuraciones usan el mismo diseño, `--obs custom --reward sparse`, con 5 semillas y 200 000 pasos. Diseño final: peligro + comida (8 entradas), el de it03; tras descartar la cola en it07 se ha restaurado su código exacto (misma huella, `0c707736`). La red de valor es una MLP con 2 capas ocultas de 64 unidades y tanh, como la política, con una salida escalar. La ventaja es Â = G − v̂(s), con v̂ sin gradiente en la pérdida del actor, y se normaliza Â, no G; el crítico aprende con el error cuadrático entre v̂(s) y G. En la tabla, `it08_baseline` sale antes que `it08_vanilla` por orden alfabético y se compara con it07: su columna «Cambia» mostrará «baseline, código de la observación, pasos», porque además del baseline se vuelve al código de it03 y se pasa de 100 000 a 200 000 pasos. La fila de `it08_vanilla` se compara con `it08_baseline` y debe mostrar solo «baseline».
+
+```
+python experiments_3/lab_3_3_reinforce.py --obs custom --reward sparse --seeds 0-4 --tag it08_vanilla
+python experiments_3/lab_3_3_reinforce.py --obs custom --reward sparse --baseline --seeds 0-4 --tag it08_baseline
+```
+
+**Predicción.** No esperamos una diferencia significativa en manzanas al final: los intervalos de las dos configuraciones se solaparán, y vanilla quedará entre 18 y 24 manzanas. Hay tres motivos. Primero, la normalización de G ya resta la media del lote, que actúa como un baseline constante, así que v̂(s) solo aporta lo que el valor cambia de un estado a otro. Segundo, al principio v̂ está mal entrenada y sus errores añaden ruido a la ventaja. Tercero, REINFORCE no tiene bonificación de entropía, así que alguna semilla puede volverse determinista antes de tiempo y quedarse atascada; si eso pasa con baseline, la media bajará y la IQM quedará claramente por encima de ella. Donde sí puede notarse el baseline es al principio del aprendizaje: curvas más parejas entre semillas a los 25 000 y 50 000 pasos. La falta del hambre en la observación (el truncado no es markoviano para v̂) no debería influir, porque con este diseño casi no hay muertes por hambre. En las dos configuraciones las muertes seguirán siendo casi todas contra el cuerpo.
 
 **Resultado.**
 
