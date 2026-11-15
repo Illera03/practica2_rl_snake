@@ -178,4 +178,24 @@ La predicción falla en lo principal: en lugar de pasar de 20, las manzanas baja
 
 ---
 
+## Iteración 7 · `it07_cola`
+
+**Hipótesis.** En it03 e it06 el 100 % de las partidas acaban contra el propio cuerpo: en los GIF, cuando la serpiente es larga, se mete en un hueco cerrado por su cuerpo y no puede salir. En it04 intentamos atacar este problema con rayos de espacio libre y fracasó: con los 4 valores continuos el aprendizaje se frenó tanto que a los 25 000 pasos las dos semillas seguían en 0,2 manzanas y el agente acabó en 1,5, con un 47 % de muertes por hambre. En cambio, los 4 bits de comida de it03, binarios y alineados con las acciones, la red los aprendió enseguida (10,4 manzanas a los 25 000 pasos en la semilla 0). Por eso probamos otra información sobre el mismo problema, pero con el formato de la comida: hacia dónde está la cola. Cuando la serpiente avanza sin comer, la casilla de la cola es la que se libera, así que la zona que rodea la cola es la que antes se vacía. Si la serpiente sabe hacia dónde queda, podrá ir hacia esa zona en lugar de meterse en un hueco cerrado.
+
+**Cambio.** Se añaden a la observación de it03 4 bits de cola, uno por acción en el orden de `MOVES`: 1 si esa acción acerca la cabeza a la cola (producto escalar entre el desplazamiento y el vector cabeza→cola mayor que 0). Total 12 entradas (peligro + comida + cola). El resto (recompensa `sparse`, hiperparámetros, presupuesto) es igual que en it03. Rasgo calculado declarado: describe dónde está la cola respecto a la cabeza, igual que la comida con la manzana; no comprueba si hay camino ni recomienda una acción. Respecto a it03 solo cambia el código de la observación. La columna «Cambia» mostrará «recompensa, código de la observación» porque compara con it06, que usaba `--reward custom`.
+
+```
+python experiments_3/lab_3_3_reinforce.py --obs custom --reward sparse --seeds 0,1 --steps 100000 --tag it07_cola
+```
+
+**Predicción.** Entre 18 y 26 manzanas por partida, probablemente dentro del ruido de it03 con 2 semillas (su intervalo es [17,85, 22,40]). Las muertes seguirán siendo casi todas contra el cuerpo, porque saber hacia dónde está la cola no dice si el hueco en el que se mete tiene salida, pero deberían llegar algo más tarde. Hay dos riesgos. Como en it04, 4 entradas más pueden ralentizar el principio del aprendizaje, aunque menos que los rayos, porque son bits con el mismo formato que la comida. Y si seguir a la cola resulta más fácil que buscar la manzana, la serpiente podría perseguirse a sí misma en círculo, y aparecerían muertes por hambre.
+
+**Criterio de decisión (fijado antes de lanzar).** La cola se queda solo si las manzanas superan a it03 (20,12) sin que aparezcan muertes por hambre. Si el resultado queda dentro del ruido o empeora, volvemos al diseño de it03 por simplicidad (8 entradas en lugar de 12).
+
+**Resultado.**
+
+**Decisión.**
+
+---
+
 (Copiad la ficha para cada iteración nueva.)
